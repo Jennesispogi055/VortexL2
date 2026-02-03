@@ -1,0 +1,17 @@
+[Unit]
+Description=VortexL2 Port Forward - Port %i
+After=network.target vortexl2-tunnel.service
+Requires=network.target
+Documentation=https://github.com/yourusername/VortexL2
+
+[Service]
+Type=simple
+# NOTE: REMOTE_IP is replaced by ForwardManager when installing the template
+ExecStart=/usr/bin/socat TCP4-LISTEN:%i,reuseaddr,fork TCP4:REMOTE_IP:%i
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
