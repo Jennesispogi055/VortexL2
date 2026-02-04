@@ -3,7 +3,8 @@
 __version__ = "1.1.0"
 __author__ = "Iliya-Developer"
 
-from .config import TunnelConfig, ConfigManager, Config
+from .config import TunnelConfig, ConfigManager
 from .tunnel import TunnelManager
 from .forward import ForwardManager
+
 

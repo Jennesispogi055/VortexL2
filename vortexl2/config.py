@@ -286,19 +286,3 @@ class ConfigManager:
         """Check if a tunnel with this name exists."""
         return (TUNNELS_DIR / f"{name}.yaml").exists()
 
-
-# Backward compatibility - single Config class that wraps first tunnel
-class Config(TunnelConfig):
-    """Backward compatible Config class - wraps first available tunnel."""
-    
-    def __init__(self):
-        manager = ConfigManager()
-        tunnels = manager.list_tunnels()
-        
-        if tunnels:
-            # Load first tunnel
-            super().__init__(tunnels[0])
-        else:
-            # Create default tunnel
-            super().__init__("tunnel1")
-            self.save()
