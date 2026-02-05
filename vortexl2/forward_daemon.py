@@ -85,7 +85,7 @@ class ForwardDaemon:
         
         # Start all forwards
         logger.info("Starting HAProxy forwards for all configured tunnels")
-        success, msg = self.forward_manager.start_all_forwards()
+        success, msg = await self.forward_manager.start_all_forwards()
         if not success:
             logger.error(f"Failed to start port forwards: {msg}")
         else:
@@ -107,7 +107,7 @@ class ForwardDaemon:
         
         if self.forward_manager:
             logger.info("Stopping HAProxy forwards")
-            self.forward_manager.stop_all_forwards()
+            await self.forward_manager.stop_all_forwards()
         
         logger.info("Forward Daemon stopped")
 
