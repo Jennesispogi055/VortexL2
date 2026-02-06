@@ -227,7 +227,7 @@ def handle_forwards_menu(manager: ConfigManager):
         ui.console.print(f"[bold]Managing forwards for tunnel: [magenta]{config.name}[/][/]\n")
         
         if current_mode == "none":
-            ui.console.print("[yellow]⚠ Port forwarding is DISABLED. Select option 8 to enable.[/]\n")
+            ui.console.print("[yellow]⚠ Port forwarding is DISABLED. Select option 6 to enable.[/]\n")
         else:
             ui.console.print(f"[green]Forward mode: {current_mode.upper()}[/]\n")
         
