@@ -29,15 +29,12 @@ class HAProxyManager:
         config = """
 # Auto-generated HAProxy config for vortexl2
 global
-    maxconn 32768
+    maxconn 4096
     log stdout local0
     log stdout local1 notice
     chroot /var/lib/haproxy
     stats socket /var/run/haproxy.sock mode 660 level admin
     stats timeout 30s
-    tune.maxconn 32768
-    tune.bufsize 16384
-    tune.ssl.default-dh-param 2048
     daemon
 
 defaults
@@ -46,8 +43,6 @@ defaults
     option  tcplog
     option  dontlognull
     option  redispatch
-    option  tcp-smart-connect
-    option  tcp-check
     retries 3
     timeout connect 5000
     timeout client  60000
@@ -89,15 +84,15 @@ frontend stats_frontend
                 config += f"""backend {backend_name}
     balance roundrobin
     mode tcp
-    option tcp-check
-    server remote_host {remote_ip}:{port} check inter 5s fall 2 rise 1 send-proxy
-    default-server inter 5s fall 2 rise 1
+    server remote_host {remote_ip}:{port} check inter 5s fall 2 rise 1
+    timeout connect 5000
+    timeout server 60000
 
 frontend {frontend_name}
     mode tcp
     bind 0.0.0.0:{port} 
     default_backend {backend_name}
-    option socket-stats
+    timeout client 60000
 """
         return config
     
