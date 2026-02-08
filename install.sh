@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # VortexL2 Installer
-# L2TPv3 Tunnel Manager for Ubuntu/Debian
+# L2TPv3 & EasyTier Tunnel Manager for Ubuntu/Debian
 #
 # Usage: 
 #   bash <(curl -Ls https://raw.githubusercontent.com/iliya-Developer/VortexL2/main/install.sh)
@@ -40,7 +40,7 @@ cat << 'EOF'
 EOF
 echo -e "${NC}"
 echo -e "${GREEN}VortexL2 Installer${NC}"
-echo -e "${CYAN}L2TPv3 Tunnel Manager for Ubuntu/Debian${NC}"
+echo -e "${CYAN}L2TPv3 & EasyTier Tunnel Manager${NC}"
 echo ""
 
 # Check root
@@ -55,12 +55,33 @@ if ! command -v apt-get &> /dev/null; then
     exit 1
 fi
 
-# Function to check if a version exists on GitHub
+# ============================================
+# TUNNEL TYPE SELECTION
+# ============================================
+echo -e "${YELLOW}Select Tunnel Type:${NC}"
+echo -e "  ${CYAN}[1]${NC} L2TPv3  - Traditional L2TP Ethernet tunnel"
+echo -e "  ${CYAN}[2]${NC} EasyTier - Mesh VPN tunnel"
+echo ""
+read -p "Enter choice [1/2] (default: 1): " TUNNEL_CHOICE
+
+case "$TUNNEL_CHOICE" in
+    2)
+        TUNNEL_MODE="easytier"
+        echo -e "${GREEN}✓ Selected: EasyTier${NC}"
+        ;;
+    *)
+        TUNNEL_MODE="l2tpv3"
+        echo -e "${GREEN}✓ Selected: L2TPv3${NC}"
+        ;;
+esac
+echo ""
+
+# ============================================
+# VERSION CHECK
+# ============================================
 check_version_exists() {
     local version="$1"
     local url="https://github.com/${GITHUB_REPO}/archive/refs/tags/${version}.tar.gz"
-    
-    # Use curl to check if the URL exists (HEAD request)
     if curl --output /dev/null --silent --head --fail "$url"; then
         return 0
     else
@@ -68,12 +89,9 @@ check_version_exists() {
     fi
 }
 
-# Function to get latest release version from GitHub
 get_latest_version() {
-    # Try to get latest release from GitHub API
     local latest
     latest=$(curl -fsSL "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" 2>/dev/null | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
-    
     if [ -n "$latest" ]; then
         echo "$latest"
     else
@@ -81,31 +99,23 @@ get_latest_version() {
     fi
 }
 
-# Determine which version to install
 if [ -n "$VERSION" ]; then
-    # Version specified by user
     echo -e "${YELLOW}Checking version: ${VERSION}${NC}"
-    
-    # Ensure version starts with 'v' if not already
     if [[ ! "$VERSION" =~ ^v ]]; then
         VERSION="v${VERSION}"
     fi
-    
     if check_version_exists "$VERSION"; then
         echo -e "${GREEN}✓ Version ${VERSION} found!${NC}"
         DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/archive/refs/tags/${VERSION}.tar.gz"
         INSTALL_VERSION="$VERSION"
     else
         echo -e "${RED}✗ Error: Version ${VERSION} not found on GitHub!${NC}"
-        echo -e "${YELLOW}Available versions can be found at: https://github.com/${GITHUB_REPO}/releases${NC}"
+        echo -e "${YELLOW}Available versions: https://github.com/${GITHUB_REPO}/releases${NC}"
         exit 1
     fi
 else
-    # No version specified - try latest release, fallback to main branch
     echo -e "${YELLOW}No version specified. Checking for latest release...${NC}"
-    
     LATEST_VERSION=$(get_latest_version)
-    
     if [ -n "$LATEST_VERSION" ]; then
         echo -e "${GREEN}✓ Latest release: ${LATEST_VERSION}${NC}"
         DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/archive/refs/tags/${LATEST_VERSION}.tar.gz"
@@ -120,39 +130,49 @@ fi
 echo -e "${CYAN}Installing version: ${INSTALL_VERSION}${NC}"
 echo ""
 
+# ============================================
+# INSTALL DEPENDENCIES
+# ============================================
 echo -e "${YELLOW}[1/6] Installing system dependencies...${NC}"
 apt-get update -qq
-# Install haproxy for high-performance port forwarding (not auto-started)
-apt-get install -y -qq python3 python3-pip python3-venv git iproute2 haproxy curl
+apt-get install -y -qq python3 python3-pip python3-venv curl haproxy socat
 
-# Install kernel modules package
-KERNEL_VERSION=$(uname -r)
-echo -e "${YELLOW}[2/6] Installing kernel modules for ${KERNEL_VERSION}...${NC}"
-apt-get install -y -qq "linux-modules-extra-${KERNEL_VERSION}" 2>/dev/null || \
-    echo -e "${YELLOW}Warning: Could not install linux-modules-extra (may already be available)${NC}"
-
-# Load L2TP modules
-echo -e "${YELLOW}[3/6] Loading L2TP kernel modules...${NC}"
-modprobe l2tp_core 2>/dev/null || true
-modprobe l2tp_netlink 2>/dev/null || true
-modprobe l2tp_eth 2>/dev/null || true
-
-# Ensure modules load on boot
-cat > /etc/modules-load.d/vortexl2.conf << 'EOF'
+if [ "$TUNNEL_MODE" = "l2tpv3" ]; then
+    apt-get install -y -qq iproute2
+    
+    # Install kernel modules package
+    KERNEL_VERSION=$(uname -r)
+    echo -e "${YELLOW}[2/6] Installing kernel modules for ${KERNEL_VERSION}...${NC}"
+    apt-get install -y -qq "linux-modules-extra-${KERNEL_VERSION}" 2>/dev/null || \
+        echo -e "${YELLOW}Warning: Could not install linux-modules-extra (may already be available)${NC}"
+    
+    # Load L2TP modules
+    echo -e "${YELLOW}[3/6] Loading L2TP kernel modules...${NC}"
+    modprobe l2tp_core 2>/dev/null || true
+    modprobe l2tp_netlink 2>/dev/null || true
+    modprobe l2tp_eth 2>/dev/null || true
+    
+    # Ensure modules load on boot
+    cat > /etc/modules-load.d/vortexl2.conf << 'EOF'
 l2tp_core
 l2tp_netlink
 l2tp_eth
 EOF
+else
+    echo -e "${YELLOW}[2/6] Skipping kernel modules (not needed for EasyTier)...${NC}"
+    echo -e "${YELLOW}[3/6] Skipping L2TP setup (EasyTier mode)...${NC}"
+fi
 
+# ============================================
+# DOWNLOAD AND INSTALL
+# ============================================
 echo -e "${YELLOW}[4/6] Installing VortexL2 (${INSTALL_VERSION})...${NC}"
 
-# Always remove existing installation and reinstall fresh
 if [ -d "$INSTALL_DIR" ]; then
     echo -e "${YELLOW}Removing existing installation...${NC}"
     rm -rf "$INSTALL_DIR"
 fi
 
-# Download and extract
 mkdir -p "$INSTALL_DIR"
 echo -e "${YELLOW}Downloading from: ${DOWNLOAD_URL}${NC}"
 
@@ -163,9 +183,51 @@ fi
 
 echo -e "${GREEN}✓ VortexL2 ${INSTALL_VERSION} downloaded successfully${NC}"
 
-# Install Python dependencies
+# ============================================
+# EASYTIER BINARY SETUP
+# ============================================
+if [ "$TUNNEL_MODE" = "easytier" ]; then
+    echo -e "${YELLOW}Setting up EasyTier binaries...${NC}"
+    
+    # Detect architecture
+    ARCH=$(uname -m)
+    case "$ARCH" in
+        x86_64|amd64)
+            EASYTIER_ARCH="linux-x86_64"
+            ;;
+        armv7l|armhf)
+            EASYTIER_ARCH="linux-armv7"
+            ;;
+        aarch64|arm64)
+            # Try x86_64 first, may need separate arm64 binary
+            EASYTIER_ARCH="linux-x86_64"
+            echo -e "${YELLOW}Warning: arm64 detected, trying x86_64 binaries...${NC}"
+            ;;
+        *)
+            echo -e "${RED}Error: Unsupported architecture: ${ARCH}${NC}"
+            echo -e "${YELLOW}Supported: x86_64, armv7${NC}"
+            exit 1
+            ;;
+    esac
+    
+    EASYTIER_SRC="$INSTALL_DIR/core/easytier/$EASYTIER_ARCH"
+    
+    if [ -d "$EASYTIER_SRC" ]; then
+        cp "$EASYTIER_SRC/easytier-core" /usr/local/bin/
+        cp "$EASYTIER_SRC/easytier-cli" /usr/local/bin/
+        chmod +x /usr/local/bin/easytier-core
+        chmod +x /usr/local/bin/easytier-cli
+        echo -e "${GREEN}✓ EasyTier binaries installed (${EASYTIER_ARCH})${NC}"
+    else
+        echo -e "${RED}Error: EasyTier binaries not found for ${EASYTIER_ARCH}${NC}"
+        exit 1
+    fi
+fi
+
+# ============================================
+# PYTHON DEPENDENCIES
+# ============================================
 echo -e "${YELLOW}[5/6] Installing Python dependencies...${NC}"
-# Try apt first (works on most systems), then fallback to pip
 apt-get install -y -qq python3-rich python3-yaml 2>/dev/null || {
     echo -e "${YELLOW}Apt packages not available, trying pip...${NC}"
     pip3 install --quiet --break-system-packages rich pyyaml 2>/dev/null || \
@@ -176,7 +238,9 @@ apt-get install -y -qq python3-rich python3-yaml 2>/dev/null || {
     }
 }
 
-# Create launcher script
+# ============================================
+# CREATE LAUNCHER AND CONFIG
+# ============================================
 cat > "$BIN_PATH" << 'EOF'
 #!/bin/bash
 # VortexL2 Launcher
@@ -184,13 +248,8 @@ exec python3 /opt/vortexl2/vortexl2/main.py "$@"
 EOF
 chmod +x "$BIN_PATH"
 
-# Save installed version
+# Save installed version and tunnel mode
 echo "$INSTALL_VERSION" > "$INSTALL_DIR/.version"
-
-# Install systemd units
-echo -e "${YELLOW}[6/6] Installing systemd services...${NC}"
-cp "$INSTALL_DIR/systemd/vortexl2-tunnel.service" "$SYSTEMD_DIR/"
-cp "$INSTALL_DIR/systemd/vortexl2-forward-daemon.service" "$SYSTEMD_DIR/"
 
 # Create config directories
 mkdir -p "$CONFIG_DIR"
@@ -201,21 +260,34 @@ mkdir -p /etc/vortexl2/haproxy
 chmod 700 "$CONFIG_DIR"
 chmod 755 /var/lib/vortexl2
 chmod 755 /var/log/vortexl2
-chown root:root /etc/vortexl2/haproxy || true
-chmod 755 /etc/vortexl2/haproxy || true
 
-# Reload systemd
+# Save tunnel mode to global config
+cat > "$CONFIG_DIR/config.yaml" << EOF
+tunnel_mode: $TUNNEL_MODE
+forward_mode: none
+EOF
+chmod 600 "$CONFIG_DIR/config.yaml"
+
+# ============================================
+# SYSTEMD SERVICES
+# ============================================
+echo -e "${YELLOW}[6/6] Installing systemd services...${NC}"
+
+if [ "$TUNNEL_MODE" = "l2tpv3" ]; then
+    cp "$INSTALL_DIR/systemd/vortexl2-tunnel.service" "$SYSTEMD_DIR/"
+fi
+cp "$INSTALL_DIR/systemd/vortexl2-forward-daemon.service" "$SYSTEMD_DIR/"
+
 systemctl daemon-reload
 
-# ---- CLEANUP OLD SERVICES ----
+# ============================================
+# CLEANUP OLD SERVICES
+# ============================================
 echo -e "${YELLOW}Cleaning up old services...${NC}"
-
-# Stop and disable old socat-based forward services
 systemctl stop 'vortexl2-forward@*.service' 2>/dev/null || true
 systemctl disable 'vortexl2-forward@*.service' 2>/dev/null || true
 rm -f "$SYSTEMD_DIR/vortexl2-forward@.service" 2>/dev/null || true
 
-# Remove old nftables rules if they exist
 if command -v nft &> /dev/null; then
     nft delete table inet vortexl2_filter 2>/dev/null || true
     nft delete table ip vortexl2_nat 2>/dev/null || true
@@ -223,44 +295,50 @@ fi
 rm -f /etc/nftables.d/vortexl2-forward.nft 2>/dev/null || true
 rm -f /etc/sysctl.d/99-vortexl2-forward.conf 2>/dev/null || true
 
-# Stop old forward daemon if running (will be restarted with new config)
 systemctl stop vortexl2-forward-daemon.service 2>/dev/null || true
 
 echo -e "${GREEN}  ✓ Old services cleaned up${NC}"
 
-# Enable services (but don't auto-start forwarding - user chooses mode)
-systemctl enable vortexl2-tunnel.service 2>/dev/null || true
+# ============================================
+# ENABLE SERVICES
+# ============================================
+if [ "$TUNNEL_MODE" = "l2tpv3" ]; then
+    systemctl enable vortexl2-tunnel.service 2>/dev/null || true
+fi
 systemctl enable vortexl2-forward-daemon.service 2>/dev/null || true
-# Don't auto-enable haproxy - only enable if user selects haproxy mode
 
-# Start/Restart services
+# Start services if L2TPv3
 echo -e "${YELLOW}Starting VortexL2 services...${NC}"
 
-# For tunnel service: restart if active, otherwise just enable (it runs on-demand)
-if systemctl is-active --quiet vortexl2-tunnel.service 2>/dev/null; then
-    systemctl restart vortexl2-tunnel.service
-    echo -e "${GREEN}  ✓ vortexl2-tunnel service restarted${NC}"
-else
-    # Start once to apply any existing configurations
-    systemctl start vortexl2-tunnel.service 2>/dev/null || true
-    echo -e "${GREEN}  ✓ vortexl2-tunnel service started${NC}"
+if [ "$TUNNEL_MODE" = "l2tpv3" ]; then
+    if systemctl is-active --quiet vortexl2-tunnel.service 2>/dev/null; then
+        systemctl restart vortexl2-tunnel.service
+        echo -e "${GREEN}  ✓ vortexl2-tunnel service restarted${NC}"
+    else
+        systemctl start vortexl2-tunnel.service 2>/dev/null || true
+        echo -e "${GREEN}  ✓ vortexl2-tunnel service started${NC}"
+    fi
 fi
 
-# NOTE: Forward daemon and HAProxy are NOT auto-started
-# User must select forward mode (socat/haproxy) in the panel to enable port forwarding
 echo -e "${YELLOW}  ℹ Port forwarding is DISABLED by default${NC}"
 echo -e "${YELLOW}  ℹ Use 'sudo vortexl2' → Port Forwards → Change Mode to enable${NC}"
 
 echo ""
 echo -e "${GREEN}============================================${NC}"
 echo -e "${GREEN}  VortexL2 ${INSTALL_VERSION} Installation Complete!${NC}"
+echo -e "${GREEN}  Tunnel Mode: ${TUNNEL_MODE^^}${NC}"
 echo -e "${GREEN}============================================${NC}"
 echo ""
 echo -e "${CYAN}Next steps:${NC}"
 echo -e "  1. Run: ${GREEN}sudo vortexl2${NC}"
-echo -e "  2. Create Tunnel (select IRAN or KHAREJ)"
-echo -e "  3. Configure IPs"
-echo -e "  4. Add port forwards (Iran side only)"
+if [ "$TUNNEL_MODE" = "l2tpv3" ]; then
+    echo -e "  2. Create Tunnel (select IRAN or KHAREJ)"
+    echo -e "  3. Configure IPs"
+else
+    echo -e "  2. Create EasyTier Tunnel (configure mesh)"
+    echo -e "  3. Set peer IP and secret"
+fi
+echo -e "  4. Add port forwards"
 echo ""
 echo -e "${YELLOW}Quick start:${NC}"
 echo -e "  ${GREEN}sudo vortexl2${NC}       - Open management panel"
@@ -269,6 +347,10 @@ echo -e "${CYAN}Install specific version:${NC}"
 echo -e "  ${GREEN}bash <(curl -Ls https://raw.githubusercontent.com/${GITHUB_REPO}/main/install.sh) v1.1.0${NC}"
 echo ""
 echo -e "${RED}Security Note:${NC}"
-echo -e "  L2TPv3 has NO encryption. For sensitive traffic,"
-echo -e "  consider adding IPsec or WireGuard on top."
+if [ "$TUNNEL_MODE" = "l2tpv3" ]; then
+    echo -e "  L2TPv3 has NO encryption. For sensitive traffic,"
+    echo -e "  consider adding IPsec or WireGuard on top."
+else
+    echo -e "  EasyTier uses encryption by default."
+fi
 echo ""
