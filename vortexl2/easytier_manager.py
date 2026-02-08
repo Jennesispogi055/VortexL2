@@ -334,28 +334,26 @@ WantedBy=multi-user.target
         peers = []
         lines = stdout.strip().split('\n')
         
-        # Skip header lines (first 2-3 lines usually)
-        data_started = False
+        # Parse table with Unicode box-drawing characters
         for line in lines:
             line = line.strip()
             if not line:
                 continue
             
-            # Skip header/separator lines
-            if line.startswith('|') and ('ipv4' in line.lower() or '---' in line):
-                data_started = True
+            # Skip header and separator lines (contain ┌ ├ └ ─ or header text)
+            if any(c in line for c in '┌├└─┬┴┼'):
+                continue
+            if 'ipv4' in line.lower() or 'hostname' in line.lower():
                 continue
             
-            if not data_started:
+            # Data lines start with │
+            if not line.startswith('│'):
                 continue
             
-            if not line.startswith('|'):
-                continue
+            # Parse pipe-separated values (using Unicode │)
+            parts = [p.strip() for p in line.split('│') if p.strip()]
             
-            # Parse pipe-separated values
-            parts = [p.strip() for p in line.split('|') if p.strip()]
-            
-            if len(parts) >= 8:
+            if len(parts) >= 7:
                 try:
                     peer = {
                         'ipv4': parts[0],
