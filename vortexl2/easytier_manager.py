@@ -191,6 +191,7 @@ class EasyTierConfig:
             "--listeners", f"tcp://[::]:{self.port}", f"tcp://0.0.0.0:{self.port}",
             "--multi-thread",
             "--dev-name", self.interface_name,
+            "--rpc-portal", "127.0.0.1:15888",  # Required for easytier-cli to work
         ]
         
         if self.peer_ip:
