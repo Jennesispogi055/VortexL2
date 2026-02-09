@@ -673,6 +673,62 @@ def handle_easytier_cron_menu():
         ui.wait_for_enter()
 
 
+def handle_dns_menu():
+    """Handle DNS Manager menu."""
+    from vortexl2 import dns_manager
+    from vortexl2 import dns_ui
+    
+    while True:
+        ui.clear_screen()
+        ui.show_banner()
+        
+        # Show current status
+        dns_ui.show_dns_status()
+        
+        choice = dns_ui.show_dns_menu()
+        
+        if choice == "0":
+            break
+        elif choice == "1":
+            # Scan & Apply Best DNS
+            dns_ui.scan_dns_with_progress()
+            ui.wait_for_enter()
+        elif choice == "2":
+            # View Current DNS (already shown above)
+            ui.wait_for_enter()
+        elif choice == "3":
+            # Set Auto-Check Interval
+            hours = dns_ui.prompt_check_interval()
+            if hours:
+                success, msg = dns_manager.set_check_interval(hours)
+                if success:
+                    ui.show_success(msg)
+                else:
+                    ui.show_error(msg)
+            ui.wait_for_enter()
+        elif choice == "4":
+            # Enable Auto-Check
+            config = dns_manager.get_dns_config()
+            hours = config.get('check_interval_hours', 4)
+            success, msg = dns_manager.update_dns_cron(hours)
+            if success:
+                ui.show_success(msg)
+            else:
+                ui.show_error(msg)
+            ui.wait_for_enter()
+        elif choice == "5":
+            # Disable Auto-Check
+            success, msg = dns_manager.remove_dns_cron()
+            if success:
+                ui.show_success(msg)
+            else:
+                ui.show_error(msg)
+            ui.wait_for_enter()
+        else:
+            ui.show_warning("Invalid option")
+            ui.wait_for_enter()
+
+
 # ============================================
 # MAIN MENU
 # ============================================
@@ -756,6 +812,8 @@ def main_menu_easytier():
                 handle_easytier_cron_menu()
             elif choice == "8":
                 handle_logs(ConfigManager())
+            elif choice == "9":
+                handle_dns_menu()
             else:
                 ui.show_warning("Invalid option")
                 ui.wait_for_enter()

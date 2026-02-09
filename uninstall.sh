@@ -82,15 +82,21 @@ rm -f /usr/local/bin/easytier-cli
 rm -f "$SYSTEMD_DIR"/vortexl2-easytier-*.service
 echo -e "${GREEN}  ✓ EasyTier removed${NC}"
 
+# Remove DNS Manager
+echo -e "${YELLOW}[3/7] Removing DNS Manager...${NC}"
+rm -f /usr/local/bin/vortexl2-dns-check
+rm -f /etc/cron.d/vortexl2-dns
+echo -e "${GREEN}  ✓ DNS Manager removed${NC}"
+
 # Disable services
-echo -e "${YELLOW}[3/6] Disabling VortexL2 services...${NC}"
+echo -e "${YELLOW}[4/7] Disabling VortexL2 services...${NC}"
 systemctl disable vortexl2-tunnel.service 2>/dev/null || true
 systemctl disable vortexl2-forward-daemon.service 2>/dev/null || true
 systemctl disable haproxy.service 2>/dev/null || true
 echo -e "${GREEN}  ✓ Services disabled${NC}"
 
 # Remove systemd service files
-echo -e "${YELLOW}[4/6] Removing systemd service files...${NC}"
+echo -e "${YELLOW}[5/7] Removing systemd service files...${NC}"
 rm -f "$SYSTEMD_DIR/vortexl2-tunnel.service"
 rm -f "$SYSTEMD_DIR/vortexl2-forward-daemon.service"
 rm -f "$SYSTEMD_DIR/vortexl2-forward@.service"
@@ -100,13 +106,13 @@ systemctl daemon-reload
 echo -e "${GREEN}  ✓ Service files removed${NC}"
 
 # Remove VortexL2 files
-echo -e "${YELLOW}[5/6] Removing VortexL2 files...${NC}"
+echo -e "${YELLOW}[6/7] Removing VortexL2 files...${NC}"
 rm -rf "$INSTALL_DIR"
 rm -f "$BIN_PATH"
 echo -e "${GREEN}  ✓ Installation files removed${NC}"
 
 # Remove configuration and data
-echo -e "${YELLOW}[6/6] Removing configuration and data...${NC}"
+echo -e "${YELLOW}[7/7] Removing configuration and data...${NC}"
 rm -rf "$CONFIG_DIR"
 rm -rf "$LOG_DIR"
 rm -rf "$DATA_DIR"

@@ -28,6 +28,7 @@ def show_easytier_main_menu() -> str:
         ("6", "Port Forwards"),
         ("7", "Tunnel Auto-Restart"),
         ("8", "View Logs"),
+        ("9", "DNS Manager"),
         ("0", "Exit"),
     ]
     

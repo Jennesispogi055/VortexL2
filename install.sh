@@ -300,6 +300,13 @@ exec python3 /opt/vortexl2/vortexl2/main.py "$@"
 EOF
 chmod +x "$BIN_PATH"
 
+# Install DNS check script
+cp "$INSTALL_DIR/scripts/vortexl2-dns-check" /usr/local/bin/
+chmod +x /usr/local/bin/vortexl2-dns-check
+
+# Install dnsutils for nslookup
+apt-get install -y -qq dnsutils 2>/dev/null || true
+
 # Save installed version and tunnel mode
 echo "$INSTALL_VERSION" > "$INSTALL_DIR/.version"
 
